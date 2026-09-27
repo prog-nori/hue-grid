@@ -60,7 +60,7 @@ HEX/RGB に切り替える場合は色域調整後の sRGB 値へ変換します
 - `tests/`: 変換と生成の回帰テスト
 
 色変換は [Oklab 作者の公開行列](https://bottosson.github.io/posts/oklab/)と [CSS Color 4](https://www.w3.org/TR/css-color-4/) を参照しています。色ライブラリの追加依存はありません。
-Lineicons は提供された tmp 配下から src/assets へコピー済みで、実行時に tmp は参照しません。元ファイルは残しています。
+Lineicons は `src/assets/lineicons/` に必要なフォントと CSS を配置しています。配布アーカイブの展開先だった `tmp/` は削除済みで、Git の管理対象からも除外しています。
 
 ## GitHub Pages
 
