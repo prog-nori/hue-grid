@@ -6,17 +6,17 @@ import { Icon } from './components/Icon'
 import { useTheme } from './hooks/useTheme'
 import { tonePatterns } from './presets/tonePatterns'
 import { hexToOklch } from './color/convert'
-import type { OklchColor, PaletteRecord } from './types/color'
+import type { OklchColor, PaletteRecord, Tone } from './types/color'
 
 function App() {
   const { theme, toggleTheme } = useTheme()
-  const [records, setRecords] = useState<PaletteRecord[]>(() => ['#6366F1', '#0EA5E9', '#22C55E'].map((hex, i) => ({ id: `sample-${i}`, baseColor: hexToOklch(hex) })))
+  const [records, setRecords] = useState<PaletteRecord[]>(() => ['#6366F1', '#0EA5E9', '#22C55E'].map((hex, i) => ({ id: `sample-${i}`, baseColor: hexToOklch(hex), anchorTone: 500 })))
   const [patternId, setPatternId] = useState('balanced')
   const [notice, setNotice] = useState('')
   const pattern = tonePatterns.find((item) => item.id === patternId) ?? tonePatterns[1]
 
-  function addColor(baseColor: OklchColor) {
-    setRecords((current) => [...current, { id: crypto.randomUUID(), baseColor }])
+  function addColor(baseColor: OklchColor, anchorTone: Tone) {
+    setRecords((current) => [...current, { id: crypto.randomUUID(), baseColor, anchorTone }])
     setNotice('パレットを追加しました。')
   }
   function deleteColor(id: string) {
@@ -48,7 +48,7 @@ function App() {
         <section aria-labelledby="palettes-heading">
           <div className="mb-5 flex flex-wrap items-end justify-between gap-3"><div className="flex items-center gap-3"><h2 id="palettes-heading" className="text-lg font-semibold">カラーパレット</h2><span className="badge">{records.length} 色相</span><span className="text-xs text-[var(--muted)]">11 トーン</span></div><p className="text-xs text-[var(--muted)]">セルを選んで詳細を確認 · クリックで HEX をコピー</p></div>
           <PaletteGrid records={records} pattern={pattern} onDelete={deleteColor} onCopy={copyColor} />
-          <div className="mt-4 flex flex-wrap justify-between gap-3 text-xs leading-6 text-[var(--muted)]"><p>500 は基準色 · 左から明るい色 → 暗い色</p><p>セル右上の点は、sRGB に収めるための彩度調整を示します。</p></div>
+          <div className="mt-4 flex flex-wrap justify-between gap-3 text-xs leading-6 text-[var(--muted)]"><p>枠付きのセルが各行の基準色 · 左から明るい色 → 暗い色</p><p>セル右上の点は、sRGB に収めるための彩度調整を示します。</p></div>
         </section>
         <div role="status" aria-live="polite" className="mt-6 min-h-6 text-sm text-violet-700 dark:text-violet-300">{notice}</div>
         <footer className="mt-8 flex flex-wrap justify-between gap-3 border-t border-[var(--border)] pt-6 text-xs text-[var(--muted)]"><p>HueGrid · 色の設計に、共通のものさしを。</p><p>パレットはこの画面内で保持されます。再読み込みで初期状態に戻ります。</p></footer>

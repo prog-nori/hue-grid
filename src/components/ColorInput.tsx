@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import type { OklchColor } from '../types/color'
+import { tones } from '../types/color'
+import type { OklchColor, Tone } from '../types/color'
 import { inputFormats, parseColorInput } from '../color/input'
 import type { InputFormat } from '../color/input'
 import { hexToOklch, oklchToHex, oklchToRgb } from '../color/convert'
 import { mapToSrgb, isInSrgb } from '../color/gamut'
 import { Icon } from './Icon'
 
-export function ColorInput({ onAdd }: { onAdd: (color: OklchColor) => void }) {
+export function ColorInput({ onAdd }: { onAdd: (color: OklchColor, anchorTone: Tone) => void }) {
+  const [anchorTone, setAnchorTone] = useState<Tone>(500)
   const [format, setFormat] = useState<InputFormat>('hex')
   const [values, setValues] = useState(['#6366F1'])
   const [error, setError] = useState('')
@@ -32,7 +34,7 @@ export function ColorInput({ onAdd }: { onAdd: (color: OklchColor) => void }) {
   function submit(event: FormEvent) {
     event.preventDefault()
     try {
-      onAdd(parseColorInput(format, values))
+      onAdd(parseColorInput(format, values), anchorTone)
       setError('')
     } catch (cause) { setError(cause instanceof Error ? cause.message : '入力内容を確認してください。') }
   }
@@ -42,7 +44,16 @@ export function ColorInput({ onAdd }: { onAdd: (color: OklchColor) => void }) {
     <form onSubmit={submit} noValidate className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-semibold">基準色を追加</h2>
-        <span className="badge">500 の基準色</span>
+        <span className="badge">{anchorTone} の基準色</span>
+      </div>
+      <div className="flex items-center gap-3">
+        <div className="w-28 shrink-0">
+          <label className="field-label" htmlFor="anchor-tone">基準トーン</label>
+          <select id="anchor-tone" className="field" value={anchorTone} aria-describedby="anchor-help" onChange={(e) => setAnchorTone(Number(e.target.value) as Tone)}>
+            {tones.map((tone) => <option key={tone} value={tone}>{tone}</option>)}
+          </select>
+        </div>
+        <p id="anchor-help" className="text-xs leading-5 text-[var(--muted)]">入力色を配置する位置。<br />暗い色を基準にするなら 900 などを選べます。</p>
       </div>
       <div className="flex flex-wrap items-end gap-3">
         <div className="w-24 shrink-0">
