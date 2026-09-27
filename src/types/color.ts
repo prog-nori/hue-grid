@@ -14,6 +14,7 @@ export interface RgbColor {
 export interface PaletteRecord {
   id: string
   baseColor: OklchColor
+  anchorTone: Tone
 }
 
 export const tones = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const

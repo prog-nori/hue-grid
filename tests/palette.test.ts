@@ -62,3 +62,46 @@ test('input accepts all formats and rejects blank, nonfinite and out-of-range va
   assert.throws(() => parseColorInput('rgb', ['256', '0', '0']))
   assert.throws(() => mapToSrgb({ l: NaN, c: 0, h: 0 }))
 })
+
+for (const pattern of tonePatterns) {
+  test(`${pattern.id}: every anchor tone preserves its input and produces ordered finite colors`, () => {
+    for (const anchor of tones) {
+      for (const base of [hexToOklch('#24262B'), { l: 0, c: 0, h: 0 }, { l: 1, c: 0, h: 0 }, { l: 0.6, c: 0.5, h: 30 }]) {
+        const palette = generatePalette(base, pattern, anchor)
+        assert.deepEqual(palette.find((cell) => cell.tone === anchor)?.requested, base)
+        assert.equal(palette.find((cell) => cell.tone === anchor)?.hex, oklchToHex(mapToSrgb(base)))
+        for (const [i, cell] of palette.entries()) {
+          assert.ok(Object.values(cell.requested).every(Number.isFinite))
+          assert.equal(cell.requested.h, base.h)
+          assert.ok(isInSrgb(cell.mapped))
+          if (i > 0) assert.ok(palette[i - 1].requested.l >= cell.requested.l)
+        }
+        if (anchor !== 50) assert.ok(Math.abs(palette[0].requested.c - base.c * 0.15) < 1e-10)
+        if (anchor !== 950) assert.ok(Math.abs(palette[10].requested.c - base.c * 0.15) < 1e-10)
+      }
+    }
+  })
+}
+
+test('900 anchor retains a dark input and creates lighter border / placeholder candidates', () => {
+  const base = hexToOklch('#24262B')
+  for (const pattern of tonePatterns) {
+    const palette = generatePalette(base, pattern, 900)
+    assert.equal(palette[9].hex, '#24262B')
+    assert.ok(palette[5].requested.l > base.l)
+    assert.ok(palette[10].requested.l < base.l)
+  }
+})
+
+test('default anchor remains 500 and matches the previous symmetric rule', () => {
+  const base = hexToOklch('#6366F1')
+  for (const pattern of tonePatterns) {
+    const palette = generatePalette(base, pattern)
+    assert.deepEqual(palette, generatePalette(base, pattern, 500))
+    for (const cell of palette) {
+      const x = Math.abs(cell.tone - 500) / 450
+      const endpoint = cell.tone < 500 ? Math.max(base.l, pattern.lightEndpoint) : Math.min(base.l, pattern.darkEndpoint)
+      assert.equal(cell.requested.l, base.l + (endpoint - base.l) * (pattern.lightness(x) - pattern.lightness(0)))
+    }
+  }
+})
