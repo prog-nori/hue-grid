@@ -1,0 +1,19 @@
+@font-face {
+  font-family: 'lineicons-free';
+  src: url('./lineicons-free.woff2') format('woff2');
+  font-display: block;
+}
+
+.lni {
+  font-family: 'lineicons-free';
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+}
+.lni-sun-1::before { content: '\e2c6'; }
+.lni-moon-half-right-5::before { content: '\e1fb'; }
+.lni-trash-3::before { content: '\e2f1'; }
+.lni-plus::before { content: '\e24a'; }
+.lni-colour-palette-3::before { content: '\e0c5'; }
+.lni-check::before { content: '\e09f'; }
