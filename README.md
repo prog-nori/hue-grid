@@ -64,10 +64,39 @@ Lineicons は `src/assets/lineicons/` に必要なフォントと CSS を配置�
 
 ## GitHub Pages
 
-`vite.config.ts` の `base: './'` により、リポジトリ名のサブパスでもアセットを解決できます。
-`npm ci` → `npm run build` を実行し、生成された `dist/` の内容を GitHub Pages の公開成果物にしてください。
+`.github/workflows/deploy-pages.yml` で、`master` への push 時に自動デプロイします。
+Node.js は `.nvmrc` に合わせ、`npm ci` → Lint → テスト → 型チェック・ビルド → 公開の順に実行します。
+検証に失敗した場合は公開しません。`dist/` や `node_modules/` のコミットは不要です。
+
+### 初回設定
+
+1. [リポジトリの Settings → Pages](https://github.com/prog-nori/hue-grid/settings/pages) を開きます。
+2. **Build and deployment → Source** を **GitHub Actions** にします。
+3. このワークフローと README を `master` にコミットして push します。
+
+```bash
+git add .github/workflows/deploy-pages.yml README.md
+git commit -m "Configure GitHub Pages deployment"
+git push origin master
+```
+
+4. [Actions](https://github.com/prog-nori/hue-grid/actions) で **Deploy HueGrid to GitHub Pages** の `build` / `deploy` が成功することを確認します。
+5. 実行結果の `github-pages` 環境リンクからサイトを開きます。カスタムドメイン未設定時の想定 URL は https://prog-nori.github.io/hue-grid/ です。
+
+すでに push 済みの場合は、Source 設定後に Actions → 対象ワークフロー → **Run workflow** → `master` を選択して実行できます。
+以降は `master` に push するだけで更新されます。公開ブランチを変更する場合はワークフローの `branches` と `deploy.if` も変更してください。
+
+### パスと権限
+
+ローカルでは `vite.config.ts` の `base: './'` を使用し、CI では `configure-pages` が返す `base_path` を Vite の `--base` に渡します。
+そのため、`/hue-grid/` 配下の JavaScript・CSS・フォント・favicon を正しいパスで参照します。
 ルーティングは使用していないため、サーバー側の SPA フォールバックは不要です。
-公開先リポジトリの作成・Pages 有効化・デプロイはこの実装には含みません。
+公開には自動提供される `GITHUB_TOKEN` を使用し、手動のトークンや Secrets 登録は不要です。
+
+Actions が無効な場合は Settings → Actions → General で GitHub Actions の実行を許可してください。
+環境の保護ルールが設定されている場合は、Settings → Environments → github-pages で `master` からのデプロイが許可されていることを確認してください。
+
+参考: [GitHub Pages のカスタムワークフロー](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)、[Vite のデプロイガイド](https://vite.dev/guide/static-deploy.html#github-pages)。
 
 ## 拡張
 
